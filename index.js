@@ -35,7 +35,7 @@ app.post('/api/chat', async (req, res) => {
                 
                 body: JSON.stringify({
                     model: "inclusionai/ling-3.2-flash:free",
-                    messages: message,
+                    messages: messages,
                     temperature: 0.7,
                     max_tokens: 1000,
                     stream: true
@@ -45,4 +45,19 @@ app.post('/api/chat', async (req, res) => {
 
         if (!response.ok) {
             const errorData = await response.text();
+
+            console.error("OpenRouter Error:", errorData);
+
+            return res.status(response.status).json({
+                error: errorData
+            });
+        }
+
+        //header utk streaming
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
                    
